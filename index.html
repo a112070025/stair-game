@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>下樓梯</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #cceeff; font-family: sans-serif; text-align: center; }
+    canvas { background: #f0f0f0; display: block; margin: 20px auto; border: 2px solid #333; }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    #scoreBoard {
+      font-size: 20px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>小朋友下樓梯</h1>
+  <button id="startBtn">開始遊戲</button>
+  <div id="scoreBoard" style="display:none;">分數：0</div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <button id="restartBtn" style="display:none;">重新開始</button>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const scoreBoard = document.getElementById("scoreBoard");
+
+    // 音效
+    const jumpSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
+    const gameOverSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
+    const starSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
+    const bananaSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
+    const bgm = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
+    bgm.loop = true;
+
+    let player, stairs, bananas, stars, score, highScore = 0;
+    let gameInterval, keys = {}, gameRunning = false, speed = 1.5;
+
+    class Player {
+      constructor() {
+        this.w = 30;
+        this.h = 30;
+        this.x = canvas.width / 2 - this.w / 2;
+        this.y = 100;
+        this.dy = 2;
+        this.dx = 4;
+        this.emoji = "🤺";
+      }
+      draw() {
+        ctx.font = "28px serif";
+        ctx.fillText(this.emoji, this.x, this.y + this.h);
+      }
+      move() {
+        if (keys["ArrowLeft"] && this.x > 0) this.x -= this.dx;
+        if (keys["ArrowRight"] && this.x + this.w < canvas.width) this.x += this.dx;
+        this.y += this.dy;
+      }
+    }
+
+    class Stair {
+      constructor(y) {
+        this.h = 10;
+        this.w = Math.random() * 150 + 50;
+        this.x = Math.random() * (canvas.width - this.w);
+        this.y = y;
+        this.color = "#9966cc";
+      }
+      draw() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+      }
+    }
+
+    class Banana {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = 20;
+        this.emoji = "☠️";
+      }
+      draw() {
+        ctx.font = "20px serif";
+        ctx.fillText(this.emoji, this.x - 10, this.y + 5);
+      }
+    }
+
+    class Star {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = 20;
+        this.emoji = "⭐";
+      }
+      draw() {
+        ctx.font = "20px serif";
+        ctx.fillText(this.emoji, this.x - 10, this.y + 5);
+      }
+    }
+
+    function drawSpikes() {
+      ctx.fillStyle = "red";
+      for (let i = 0; i < canvas.width; i += 20) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + 10, 15);
+        ctx.lineTo(i + 20, 0);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function initGame() {
+      player = new Player();
+      stairs = [];
+      bananas = [];
+      stars = [];
+      score = 0;
+      speed = 1.5;
+
+      for (let i = 0; i < 10; i++) {
+        let stairY = i * 60;
+        let stair = new Stair(stairY);
+        stairs.push(stair);
+        if (Math.random() < 0.2) bananas.push(new Banana(stair.x + stair.w / 2, stair.y - 10));
+        if (Math.random() < 0.15) stars.push(new Star(Math.random() * (canvas.width - 20), stair.y - 15));
+      }
+
+      gameRunning = true;
+      scoreBoard.style.display = "block";
+      restartBtn.style.display = "none";
+      bgm.currentTime = 0;
+      bgm.play();
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSpikes();
+      player.move();
+      player.draw();
+
+      let onStair = false;
+      for (let stair of stairs) {
+        stair.y -= speed;
+        stair.draw();
+        if (
+          player.y + player.h >= stair.y &&
+          player.y + player.h <= stair.y + stair.h &&
+          player.x + player.w > stair.x &&
+          player.x < stair.x + stair.w
+        ) {
+          player.y = stair.y - player.h;
+          onStair = true;
+        }
+      }
+
+      for (let banana of bananas) {
+        banana.y -= speed;
+        banana.draw();
+        if (
+          player.x < banana.x + 10 &&
+          player.x + player.w > banana.x - 10 &&
+          player.y < banana.y + 10 &&
+          player.y + player.h > banana.y - 10
+        ) {
+          bananaSound.play();
+          endGame();
+          return;
+        }
+      }
+
+      for (let star of stars) {
+        star.y -= speed;
+        star.draw();
+        if (
+          player.x < star.x + 10 &&
+          player.x + player.w > star.x - 10 &&
+          player.y < star.y + 10 &&
+          player.y + player.h > star.y - 10
+        ) {
+          score += 5;
+          starSound.currentTime = 0;
+          starSound.play();
+          stars.splice(stars.indexOf(star), 1);
+        }
+      }
+
+      if (!onStair) {
+        player.dy = 4;
+      } else {
+        player.dy = 2;
+        if (jumpSound.paused) jumpSound.play();
+      }
+
+      if (stairs.length && stairs[0].y < -10) {
+        stairs.shift();
+        let newStair = new Stair(canvas.height);
+        stairs.push(newStair);
+        if (Math.random() < 0.2) bananas.push(new Banana(newStair.x + newStair.w / 2, newStair.y - 10));
+        if (Math.random() < 0.15) stars.push(new Star(Math.random() * (canvas.width - 20), newStair.y - 15));
+        score++;
+        scoreBoard.textContent = `分數：${score} 最高：${Math.max(score, highScore)}`;
+        if (score % 10 === 0) speed += 0.2;
+      }
+
+      if (player.y > canvas.height || player.y <= 0) {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      clearInterval(gameInterval);
+      gameRunning = false;
+      highScore = Math.max(highScore, score);
+      scoreBoard.textContent += " - 遊戲結束";
+      restartBtn.style.display = "inline-block";
+      bgm.pause();
+      gameOverSound.play();
+    }
+
+    startBtn.onclick = () => {
+      startBtn.style.display = "none";
+      initGame();
+      gameInterval = setInterval(gameLoop, 1000 / 60);
+    };
+
+    restartBtn.onclick = () => {
+      initGame();
+      gameInterval = setInterval(gameLoop, 1000 / 60);
+    };
+
+    document.addEventListener("keydown", e => keys[e.key] = true);
+    document.addEventListener("keyup", e => keys[e.key] = false);
+  </script>
+</body>
+</html>
