@@ -2,17 +2,31 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>小朋友下樓梯</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #cceeff; font-family: sans-serif; text-align: center; }
-    canvas { background: #f0f0f0; display: block; margin: 20px auto; border: 2px solid #333; touch-action: none; }
+    body {
+      background: #cceeff;
+      font-family: sans-serif;
+      text-align: center;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    canvas {
+      background: #f0f0f0;
+      display: block;
+      margin: 20px auto;
+      border: 2px solid #333;
+      touch-action: none;
+    }
     button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       font-size: 18px;
       margin: 10px;
       cursor: pointer;
+      touch-action: manipulation;
     }
     #scoreBoard {
       font-size: 20px;
@@ -21,34 +35,35 @@
     #mobileControls {
       display: none;
     }
+    #restartBtn {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
     @media (pointer: coarse) {
       #mobileControls {
         display: flex;
         justify-content: space-between;
         position: absolute;
-        bottom: 30px;
+        bottom: 40px;
         left: 50%;
         transform: translateX(-50%);
         width: 90%;
         opacity: 0.7;
+        z-index: 5;
       }
       #mobileControls button {
         font-size: 24px;
         padding: 20px;
         flex: 1;
+        margin: 0 5px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid #ccc;
+        border-radius: 10px;
         touch-action: manipulation;
-      }
-    }
-    #restartBtn {
-      display: none;
-    }
-    @media (pointer: coarse) {
-      #restartBtn {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 10;
       }
     }
   </style>
@@ -279,7 +294,6 @@
     document.addEventListener("keydown", e => keys[e.key] = true);
     document.addEventListener("keyup", e => keys[e.key] = false);
 
-    // 手機觸控支援
     leftBtn.addEventListener("touchstart", () => keys["ArrowLeft"] = true);
     leftBtn.addEventListener("touchend", () => keys["ArrowLeft"] = false);
     rightBtn.addEventListener("touchstart", () => keys["ArrowRight"] = true);
@@ -287,4 +301,3 @@
   </script>
 </body>
 </html>
-
