@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>下樓梯</title>
+  <title>小朋友下樓梯</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #cceeff; font-family: sans-serif; text-align: center; }
-    canvas { background: #f0f0f0; display: block; margin: 20px auto; border: 2px solid #333; }
+    canvas { background: #f0f0f0; display: block; margin: 20px auto; border: 2px solid #333; touch-action: none; }
     button {
       padding: 10px 20px;
       font-size: 18px;
@@ -18,6 +18,21 @@
       font-size: 20px;
       margin: 10px;
     }
+    #mobileControls {
+      display: none;
+    }
+    @media (pointer: coarse) {
+      #mobileControls {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 10px;
+      }
+      #mobileControls button {
+        font-size: 24px;
+        padding: 10px 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -25,6 +40,10 @@
   <button id="startBtn">開始遊戲</button>
   <div id="scoreBoard" style="display:none;">分數：0</div>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="mobileControls">
+    <button id="leftBtn">←</button>
+    <button id="rightBtn">→</button>
+  </div>
   <button id="restartBtn" style="display:none;">重新開始</button>
 
   <script>
@@ -33,13 +52,15 @@
     const startBtn = document.getElementById("startBtn");
     const restartBtn = document.getElementById("restartBtn");
     const scoreBoard = document.getElementById("scoreBoard");
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
 
     // 音效
-    const jumpSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
-    const gameOverSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
-    const starSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
-    const bananaSound = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
-    const bgm = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA...（省略）");
+    const jumpSound = new Audio("data:audio/mp3;base64,//uQZ...（省略）");
+    const gameOverSound = new Audio("data:audio/mp3;base64,//uQZ...（省略）");
+    const starSound = new Audio("data:audio/mp3;base64,//uQZ...（省略）");
+    const bananaSound = new Audio("data:audio/mp3;base64,//uQZ...（省略）");
+    const bgm = new Audio("data:audio/mp3;base64,//uQZ...（省略）");
     bgm.loop = true;
 
     let player, stairs, bananas, stars, score, highScore = 0;
@@ -237,8 +258,21 @@
       gameInterval = setInterval(gameLoop, 1000 / 60);
     };
 
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
+    // 手機觸控支援
+    leftBtn.addEventListener("touchstart", () => keys["ArrowLeft"] = true);
+    leftBtn.addEventListener("touchend", () => keys["ArrowLeft"] = false);
+    rightBtn.addEventListener("touchstart", () => keys["ArrowRight"] = true);
+    rightBtn.addEventListener("touchend", () => keys["ArrowRight"] = false);
+
+    // 電腦鍵盤控制
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") keys["ArrowLeft"] = true;
+      if (e.key === "ArrowRight") keys["ArrowRight"] = true;
+    });
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft") keys["ArrowLeft"] = false;
+      if (e.key === "ArrowRight") keys["ArrowRight"] = false;
+    });
   </script>
 </body>
 </html>
