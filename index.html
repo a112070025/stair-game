@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>小朋友下樓梯</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,44 +20,35 @@
     }
     #mobileControls {
       display: none;
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      z-index: 10;
     }
-    #leftBtn, #rightBtn {
-      position: absolute;
-      bottom: 20px;
-      padding: 15px;
-      font-size: 24px;
-      background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 10px;
-    }
-    #leftBtn {
-      left: 10%;
-    }
-    #rightBtn {
-      right: 10%;
-    }
-    #restartBtn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 24px;
-      padding: 15px 30px;
-      display: none;
-    }
-
     @media (pointer: coarse) {
       #mobileControls {
         display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-top: 10px;
+        justify-content: space-between;
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        opacity: 0.7;
+      }
+      #mobileControls button {
+        font-size: 24px;
+        padding: 20px;
+        flex: 1;
+        touch-action: manipulation;
+      }
+    }
+    #restartBtn {
+      display: none;
+    }
+    @media (pointer: coarse) {
+      #restartBtn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
       }
     }
   </style>
@@ -296,3 +287,4 @@
   </script>
 </body>
 </html>
+
